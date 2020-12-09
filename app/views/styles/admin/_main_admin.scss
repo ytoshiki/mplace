@@ -1,0 +1,27 @@
+.admin {
+  display: flex;
+  &_left {
+    width: 180px;
+    height: 100vh;
+    background: $black_color;
+    display: flex;
+    padding-top: 50px;
+    justify-content: center;
+    &_inner {
+      .admin_options {
+        .admin_option {
+          margin: 15px 0;
+          a {
+            color: $white_color;
+          }
+        }
+      }
+    }
+  }
+
+  &_right {
+    width: calc(100% - 180px);
+    &_inner {
+    }
+  }
+}

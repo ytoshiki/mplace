@@ -4,7 +4,7 @@ class Hub {
 
   private $url;
   private $split_url;
-  private $controller = "Post";
+  private $controller = "Page";
   private $method = "index";
   private $params = array();
 

@@ -1,0 +1,49 @@
+.single {
+  overflow-y: auto;
+  &_post {
+    margin-top: 150px;
+    &_top {
+      &_title {
+      }
+
+      &_author {
+        display: flex;
+        align-items: center;
+        .author_image {
+          width: 40px;
+          margin-right: 10px;
+          img {
+            width: 100%;
+          }
+          .author_name {
+          }
+
+          .author_date {
+          }
+        }
+      }
+    }
+
+    &_bottom {
+      display: flex;
+      &_content {
+        width: 70%;
+        .spb_image {
+          img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+          }
+        }
+
+        .spb_body {
+        }
+      }
+
+      .widgets {
+        padding: 0 15px;
+        width: 30%;
+      }
+    }
+  }
+}

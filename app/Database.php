@@ -16,8 +16,48 @@
         $this->error = $ex->getMessage();
         echo $this->error;
       }
-
-
     }
+
+    public function query($query) {
+      $this->stmt = $this->db->prepare($query);
+    }
+
+    public function bind($param, $value) {
+  
+        $option = null;
+
+        switch(true) {
+          case is_numeric($value):
+            $option = PDO::PARAM_INT;
+          break;
+          case is_bool($value):
+            $option = PDO::PARAM_BOOL;
+          break;
+          case is_null($value):
+            $option = PDO::PARAM_NULL;
+          break;
+          default :
+            $option = PDO::PARAM_STR;
+        }
+        
+        $this->stmt->bindValue($param, $value, $option);
+    }
+
+    public function execute() {
+      return $this->stmt->execute();
+    }
+
+    public function getResult() {
+      return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getResults() {
+      return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function rowCount() {
+      return $this->stmt->rowCount();
+    }
+
   }
 ?>

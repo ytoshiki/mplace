@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+@import "global/variable";
+@import "main_page/main_page";
+@import "main_page/news_page";
+@import "main_page/singlePost";
+@import "admin/main_admin";
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+
+  color: $black_color;
+}
+
+.wrapper {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.flex_ai_c {
+  display: flex;
+  align-items: center;
+}
+
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.flex {
+  display: flex;
+}
+
+.alert {
+  color: red;
+}
