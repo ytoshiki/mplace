@@ -1,30 +1,37 @@
 <div class="news_content wrapper">
   <div class="news_content_inner">
+
     <ul class="news_nav flex_ai_c">
-      <li><a href="" class="active">Latest</a></li>
-      <li><a href="">Featured</a></li>
-      <li><a href="">News</a></li>
-      <li><a href="">Tech</a></li>
-      <li><a href="">Sport</a></li>
-     
+    <?php 
+      if(isset($data)) {
+
+      foreach($data["categories"] as $value) {
+      $name = $value->name;
+      ?>
+
+      <li><a href=""><?php echo $name; ?></a></li>
+
+      <?php 
+      }}
+      ?>
     </ul>
+
+
     <ul class="articles flex">
-
-
     <?php 
       
       if(isset($data)) {
-        foreach($data as $value => $key) {
 
-          $title = $key["title"];
-          $author = $key["author"];
-          $image = $key["image"];
-          $id = $key["id"];
+        foreach($data["posts"] as $value) {
+          $title = $value->title;
+       
+          $image = $value->image;
+          $id = $value->id;
       ?>
 
 
           <li class="article">
-          <div class="article_top" style="background: url('app/views/images/<?php echo $image ?>.jpg');">
+          <div class="article_top" style="background: url('app/views/uploads/<?php echo $image ?>');">
             <div class="article_title">
             <a href="<?php echo URLROOT ?>/page/post/<?php echo $id ?>">
               <?php echo $title; ?>
@@ -33,7 +40,7 @@
           </div>
           <div class="article_bottom">
             <div class="article_author">
-              <p><?php echo $author; ?></p>
+              <p><?php echo "user"; ?></p>
             </div>
             <div class="article_func">
               <div class="article_fav">

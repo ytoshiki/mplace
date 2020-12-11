@@ -6,78 +6,288 @@
       $this->adminModel = $this->model('AdminModel');
     }
 
-    public function index($edit = null) {
+    public function index($edit = null, $id = null) {
       if($_SERVER['REQUEST_METHOD'] == 'GET') {
-        $display;
+        $display = "";
+        $postData = array();
+        $commentData = array();
+        $categoryData = array();
+
         switch($edit) {
           case "posts":
             $display = "posts";
+            $postData = $this->adminModel->getAllPosts();
           break;
           case "cposts":
             $display = "cposts";
+            $categoryData = $this->adminModel->getAllCategories();
           break;
           case "categories":
             $display = "categories";
+            $categoryData = $this->adminModel->getAllCategories();
+          break;
+          case "ccategories":
+            $display = "ccategories";
           break;
           case "comments":
             $display = "comments";
+            $commentData = $this->adminModel->getAllComments();
           break;
           case "users":
             $display = "users";
           break;
+          case "uposts":
+            $display = "uposts";
+            $postData = $this->adminModel->getPost($id);
+            $categoryData = $this->adminModel->getAllCategories();
+          break;
           default:
-            $display = "";
+            
         }
         $data_container = array();
         $data_container["display"] = $display;
+        $data_container["posts"] = $postData;
+        $data_container["comments"] = $commentData;
+        $data_container["categories"] = $categoryData;
         $this->view("admin/main_admin", $data_container);
-       
       }
     }
 
-    public function posts($action = null) {
-      if($_SERVER["REQUEST_METHOD"] == "POST") {
+    public function posts($id = null) {
+      if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['post'])) {
         $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
         $tem_title = trim($_POST["title"]);
-        $tem_author = trim($_POST["author"]);
         $tem_body = $_POST["body"];
+        $tem_category = $_POST["category"];
+        $category_id = intval($_POST["category"]);
 
+        // Error Info
         $error = array();
         $error["title"] = "";
-        $error["author"] = "";
+       
         $error["body"] = "";
+        $error["image"] = "";
+        
+        // image info
+        $tem_image = $_FILES["file"];
+        $tem_filename = $tem_image["name"];
+        $tem_filetype = $tem_image["type"];
+        $tem_filetmp = $tem_image["tmp_name"];
+        $tem_filesize = $tem_image["size"];
+        $tem_fileerror = $tem_image["error"];
 
-        if(empty($tem_title)) {
-          $error["title"] = "title cannot be empty.";
+        // -> start iamge test
+        $tem_fileExt = explode(".", $tem_filename);
+        $tem_actFileExt = strtolower(end($tem_fileExt));
+
+        $arrowed_ext = ["jpg", "jpeg", "png", "pdf"];
+
+        if(!in_array($tem_actFileExt, $arrowed_ext)) {
+          $error["image"] = "image format must be jpg, jpeg, png, or pdf.";
         }
 
-        if(empty($tem_author)) {
-          $error["author"] = "author cannot be empty.";
+        if($tem_fileerror !== 0) {
+          $error["image"] = "Something wrong with the image you selected. Try another one.";
+        }
+
+        if($tem_filesize > 1000000) {
+          $error["image"] = "image size is too big. Try another one.";
+        }
+
+        
+        // <- end image test
+
+      
+        if(empty($tem_title)) {
+          $error["title"] = "title cannot be empty.";
         }
 
         if(empty($tem_body)) {
           $error["body"] = "body cannot be empty.";
         }
 
-        if(!$error) {
-          $data = array();
-          $data["title"] = trim($_POST["title"]);
-          $data["author"] = trim($_POST["author"]);
-          $data["body"] = $_POST["body"];
+        if(!$error["title"]  && !$error["body"]) {
+
+          
+          // save images ->
+          if(empty($error["images"])) {
+            $unique = uniqid("", true);
+            $filename = $unique . "." . $tem_actFileExt;
+    
+            $fileDestination = "app/views/uploads/" . $filename;
+    
+            move_uploaded_file($tem_filetmp, $fileDestination);
+      
+            // <- saved image 
+
+            $data = array();
+            $data["title"] = trim($_POST["title"]);
+           
+            $data["body"] = $_POST["body"];
+            $data["image"] = $filename;
+            $data["category"] = $category_id;
+            if($this->adminModel->createPost($data)) {
+              redirect("admin/index/posts");
+            } else {
+              echo "failed";
+            }
+        }
         } else {
           $data_container = array();
           $data_container["display"] = "cposts";
-        $data_container["error"] = $error;
-        $this->view("admin/main_admin", $data_container);
+          $data_container["error"] = $error;
+          $this->view("admin/main_admin", $data_container);
         }
-     
+      } elseif($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
 
+          $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+          $tem_title = trim($_POST["title"]);
+          $tem_body = $_POST["body"];
+          $tem_category = $_POST["category"];
+          $category_id = intval($_POST["category"]);
+
+          $error = array();
+          $error["title"] = "";
+         
+          $error["body"] = "";
+          $error["image"] = "";
+
+           // image info
+           $tem_image = $_FILES["file"];
+           $tem_filename = $tem_image["name"];
+           $tem_filetype = $tem_image["type"];
+           $tem_filetmp = $tem_image["tmp_name"];
+           $tem_filesize = $tem_image["size"];
+           $tem_fileerror = $tem_image["error"];
+   
+           // -> start iamge test
+           $tem_fileExt = explode(".", $tem_filename);
+           $tem_actFileExt = strtolower(end($tem_fileExt));
+   
+           $arrowed_ext = ["jpg", "jpeg", "png", "pdf"];
+   
+           if(!in_array($tem_actFileExt, $arrowed_ext)) {
+             $error["image"] = "image format must be jpg, jpeg, png, or pdf.";
+           }
+   
+           if($tem_fileerror !== 0) {
+             $error["image"] = "Something wrong with the image you selected. Try another one.";
+           }
+   
+           if($tem_filesize > 1000000) {
+             $error["image"] = "image size is too big. Try another one.";
+           }
+   
+           // <- end image test
+   
+
+        if(empty($tem_title)) {
+          $error["title"] = "title cannot be empty.";
+        }
+
+        if(empty($tem_body)) {
+          $error["body"] = "body cannot be empty.";
+        }
+
+        if(!$error["title"] && !$error["body"]) {
+
+           // save images ->
+           if(empty($error["images"])) {
+            $unique = uniqid("", true);
+            $filename = $unique . "." . $tem_actFileExt;
+    
+            $fileDestination = "app/views/uploads/" . $filename;
+    
+            move_uploaded_file($tem_filetmp, $fileDestination);
+      
+            // <- saved image 
+            $data = array();
+            $data["title"] = trim($_POST["title"]);
+            $data["body"] = $_POST["body"];
+            $data["image"] = $filename;
+            $data["category"] = $category_id;
+            if($this->adminModel->updatePost($data, $id)) {
+              // redirect("admin/index/posts");
+              redirect("admin/index/posts");
+            } else {
+              echo "failed";
+            }
+         
+        } else {
+          $data_container = array();
+          $data_container["display"] = "uposts";
+          $data_container["error"] = $error;
+          $data_container["posts"] = $_POST;
+          $data_container["posts"]["id"] = $id;
+          $this->view("admin/main_admin", $data_container);
+        }
       }
     }
+  }
+
+  public function categories() {
+    if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['post'])) {
+      $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+      $tem_name = trim($_POST["name"]);
+   
+      // Error Info
+      $error = array();
+      $error["name"] = "";
+
+      if(empty($tem_name)) {
+        $error["name"] = "Category name cannot be empty.";
+      }
+
+      if(empty($error["name"])) {
+          // <- saved image 
+          $data = array();
+          $data["name"] = trim($_POST["name"]);
+          if($this->adminModel->createCategory($data)) {
+            // redirect("admin/index/posts");
+            redirect("admin/index/categories");
+          } else {
+            echo "failed";
+          }
+
+        } else {
+          $data_container = array();
+          $data_container["display"] = "ccategories";
+          $data_container["error"] = $error;
+          $this->view("admin/main_admin", $data_container);
+        }
+      
+     
+  
+      }}
 
 
+    public function delete($id, $table) {
+      if(!isset($id) || !isset($table)) {
+        redirect("admin/index");
+        exit;
+      }
 
+      $result;
 
+      switch($table) {
+        case "post":
+          $result = $this->adminModel->deletePost($id);
+        break;
+        case "comment":
+          $result = $this->adminModel->deleteComment($id);
+        break;
+        case "category":
+          $result = $this->adminModel->deleteCategory($id);
+        break;
+        default:
+      }
+
+      if($result) {
+        redirect("admin/index");  
+      } else {
+        redirect("admin/index/posts");
+      }
+    }
   }
 
 ?>

@@ -9,11 +9,14 @@
         <li class="admin_option">
           <a href="<?php echo URLROOT?>/admin/index/posts">Posts</a>
         </li>
-        <li class="admin_option">
-          <a href="<?php echo URLROOT?>/admin/index/cposts">Create</a>
+        <li class="admin_option indent">
+          <a href="<?php echo URLROOT?>/admin/index/cposts">- Create</a>
         </li>
         <li class="admin_option">
           <a href="<?php echo URLROOT?>/admin/index/categories">Categories</a>
+        </li>
+        <li class="admin_option indent">
+          <a href="<?php echo URLROOT?>/admin/index/ccategories">- Create</a>
         </li>
         <li class="admin_option">
           <a href="<?php echo URLROOT?>/admin/index/comments">Comments</a>
@@ -34,22 +37,28 @@
 
         switch($display_page) {
           case "posts":
-           echo "posts";
+           include("app/views/admin/posts.php");
           break;
            case "cposts":
-            include("app/views/admin/c_post.php");
+            include("app/views/admin/c_posts.php");
+           break;
+           case "uposts":
+            include("app/views/admin/u_posts.php");
            break;
           case "categories":
-            echo "categories";
+            include("app/views/admin/categories.php");
+          break;
+          case "ccategories":
+            include("app/views/admin/c_categories.php");
           break;
           case "comments":
-            echo "comments";
+            include("app/views/admin/comments.php");
           break;
           case "users":
            echo "users";
           break;
           default:
-           echo "hey world";
+           echo "<a href=". URLROOT .">VISIT WEBSITE</a>";
         }
       }
       

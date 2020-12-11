@@ -318,6 +318,25 @@ nav .main_nav li .search_input:focus {
   width: calc(100% - 180px);
 }
 
+table {
+  text-align: center;
+  background: #ffffff;
+  border-collapse: collapse;
+  width: 80%;
+  max-width: 900px;
+}
+
+table th {
+  background: #f52828;
+  color: #ffffff;
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+
+table td {
+  padding: 12px 0;
+}
+
 *,
 *::before,
 *::after {
@@ -362,5 +381,9 @@ a {
 
 .alert {
   color: red;
+}
+
+.indent {
+  padding-left: 10px;
 }
 /*# sourceMappingURL=main.css.map */

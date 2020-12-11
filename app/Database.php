@@ -51,8 +51,12 @@
       return $this->stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getResults() {
+    public function getResultsArr() {
       return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getResults() {
+      return $this->stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     public function rowCount() {

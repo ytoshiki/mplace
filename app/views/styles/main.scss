@@ -4,6 +4,7 @@
 @import "main_page/news_page";
 @import "main_page/singlePost";
 @import "admin/main_admin";
+@import "admin/post";
 
 *,
 *::before,
@@ -43,4 +44,8 @@ a {
 
 .alert {
   color: red;
+}
+
+.indent {
+  padding-left: 10px;
 }

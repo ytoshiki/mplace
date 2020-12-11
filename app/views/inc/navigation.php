@@ -20,6 +20,7 @@
       </li>
       <li><a href="">Sign up</a></li>
       <li><a href="">Log in</a></li>
+      <li><a href="<?php echo URLROOT; ?>/admin/index">edit</a></li>
     </ul>
     </div>
   </nav>

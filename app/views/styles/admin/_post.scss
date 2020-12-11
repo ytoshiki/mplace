@@ -1,0 +1,18 @@
+table {
+  text-align: center;
+  background: $white_color;
+  border-collapse: collapse;
+  width: 80%;
+  max-width: 900px;
+
+  th {
+    background: $primary_color;
+    color: $white_color;
+    padding: 8px 0;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding: 12px 0;
+  }
+}
