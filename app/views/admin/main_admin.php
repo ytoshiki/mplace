@@ -1,3 +1,8 @@
+<?php if($_SESSION["user_role"] !== "admin") {
+  redirect();
+  exit;
+} ?>
+
 <?php include('app/views/inc/head.php') ?>
 <div class="admin">
   <div class="admin_left">
@@ -55,10 +60,10 @@
             include("app/views/admin/comments.php");
           break;
           case "users":
-           echo "users";
+            include("app/views/admin/users.php");
           break;
           default:
-           echo "<a href=". URLROOT .">VISIT WEBSITE</a>";
+           include("app/views/admin/default_page.php");
         }
       }
       

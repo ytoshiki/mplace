@@ -18,9 +18,34 @@
           <input type="text" name="searchNav" placeholder="Search Article" class="search_input">
         </button>
       </li>
-      <li><a href="">Sign up</a></li>
-      <li><a href="">Log in</a></li>
-      <li><a href="<?php echo URLROOT; ?>/admin/index">edit</a></li>
+      <?php 
+      if(isset($_SESSION["user_id"]) && $_SESSION["user_role"] !== "admin") {
+        ?>
+
+        <li><?php echo $_SESSION["user_name"]; ?></li>
+        <li><a href="<?php echo URLROOT; ?>/user/logout" onclick="return confirm('Are you sure you want to log out?');">log out</a></li>
+        
+
+        <?php
+      } elseif(isset($_SESSION["user_id"]) && $_SESSION["user_role"] == "admin") {
+        ?>
+
+        <li><?php echo $_SESSION["user_name"]; ?></li>
+        <li><a href="<?php echo URLROOT; ?>/user/logout" onclick="return confirm('Are you sure you want to log out?');">log out</a></li>
+        <li><a href="<?php echo URLROOT; ?>/admin/index">edit</a></li>
+
+        <?php
+      } else {
+        ?>
+
+        
+        <li><a href="<?php echo URLROOT; ?>/user/signup">Sign up</a></li>
+        <li><a href="<?php echo URLROOT; ?>/user/login">Log in</a></li>
+     
+        <?php
+      }
+      ?>
+ 
     </ul>
     </div>
   </nav>

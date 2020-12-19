@@ -1,4 +1,7 @@
-<div class="news_content wrapper">
+
+
+
+<div class="news_content wrapper <?php echo isset($_SESSION["user_id"]) ? 'auth_set' : ''?>">
   <div class="news_content_inner">
 
     <ul class="news_nav flex_ai_c">
@@ -24,7 +27,7 @@
 
         foreach($data["posts"] as $value) {
           $title = $value->title;
-       
+          $author = $value->username;
           $image = $value->image;
           $id = $value->id;
       ?>
@@ -40,7 +43,7 @@
           </div>
           <div class="article_bottom">
             <div class="article_author">
-              <p><?php echo "user"; ?></p>
+              <p><?php echo "Written By " . $author; ?></p>
             </div>
             <div class="article_func">
               <div class="article_fav">

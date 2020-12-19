@@ -12,7 +12,7 @@ class AdminModel {
       $this->db->bind(":title", $data["title"]);
       $this->db->bind(":body", $data["body"]);
       $this->db->bind(":category_id", $data["category"]);
-      $this->db->bind(":user_id", 1);
+      $this->db->bind(":user_id", $data["user_id"]);
       $this->db->bind(":image", $data["image"]);
       return $this->db->execute();
     } catch (PDOException $ex) {
@@ -22,7 +22,7 @@ class AdminModel {
 
   public function getAllPosts() {
     try {
-      $this->db->query("SELECT p.id, p.title, p.body, p.image, p.category_id, p.user_id, u.username, c.name 
+      $this->db->query("SELECT p.id, p.title, p.body, p.image, p.category_id, p.user_id, p.status, u.username, c.name 
       FROM posts AS p 
       LEFT JOIN users AS u ON p.user_id = u.id
       LEFT JOIN categories AS c ON p.category_id = c.id
@@ -53,10 +53,10 @@ class AdminModel {
 
   public function updatePost($data, $id) {
     try {
-      $this->db->query("UPDATE posts SET title = :title, body = :body, image = :image, category_id = :category_id WHERE id = :id");
+      $this->db->query("UPDATE posts SET title = :title, body = :body, image = :image, category_id = :category_id, status = :status WHERE id = :id");
       $this->db->bind(":title", $data["title"]);
       $this->db->bind(":body", $data["body"]);
-    
+      $this->db->bind(":status", $data["status"]);
       $this->db->bind(":image", $data["image"]);
       $this->db->bind(":category_id", $data["category"]);
       $this->db->bind(":id", $id);
@@ -68,19 +68,37 @@ class AdminModel {
   }
 
   public function deletePost($id) {
+    if($_SESSION["user_role"] !== "admin") {
+      redirect();
+      exit();
+    }
     try {
       $this->db->query("DELETE FROM posts WHERE id = :id");
       $this->db->bind(":id", $id);
-      return $this->db->execute();
+      $result = $this->db->execute();
       
     } catch (PDOException $ex) {
       echo $ex->getMessage();
+    }
+
+    if($result) {
+      try {
+        $this->db->query("DELETE FROM comments WHERE post_id = :id");
+        $this->db->bind(":id", $id);
+        return $this->db->execute();
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
     }
   }
 
   public function getAllComments() {
     try {
-      $this->db->query("SELECT * FROM comments");
+      $this->db->query("SELECT c.id, c.user_id, c.comment, c.post_id, u.username, p.title
+       FROM comments AS c
+       LEFT JOIN users AS u ON c.user_id = u.id
+       LEFT JOIN posts AS p ON c.post_id = p.id");
+
       $this->db->execute();
       $rowCount = $this->db->rowCount();
       if($rowCount !== 0) {
@@ -105,13 +123,39 @@ class AdminModel {
   }
 
   public function deleteCategory($id) {
+    if($_SESSION["user_role"] !== "admin") {
+      redirect();
+      exit();
+    }
     try {
       $this->db->query("DELETE FROM categories WHERE id = :id");
       $this->db->bind(":id", $id);
-      return $this->db->execute();
+      $categorydelete = $this->db->execute();
       
     } catch (PDOException $ex) {
       echo $ex->getMessage();
+    }
+
+    if($categorydelete) {
+      try {
+        $this->db->query("DELETE FROM posts WHERE category_id = :id");
+        $this->db->bind(":id", $id);
+        $this->db->execute();
+        
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
+    }
+
+    if($categorydelete) {
+      try {
+        $this->db->query("DELETE FROM comments WHERE category_id = :id");
+        $this->db->bind(":id", $id);
+        $categorydelete = $this->db->execute();
+        
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
     }
   }
 
@@ -124,6 +168,158 @@ class AdminModel {
     } catch (PDOException $ex) {
       echo $ex->getMessage();
     }
+  }
+
+  public function getAllUsers() {
+    try {
+      $this->db->query("SELECT * FROM users");
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount !== 0) {
+        return $this->db->getResults();
+      }
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+  }
+
+  public function deleteUser($id) {
+
+    if($_SESSION["user_role"] !== "admin") {
+      redirect();
+      exit();
+    }
+
+    try {
+      $this->db->query("DELETE FROM users WHERE id = :id");
+      $this->db->bind(":id", $id);
+      $userDelete =  $this->db->execute();
+      
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+
+    if($userDelete) {
+      try {
+        $this->db->query("DELETE FROM posts WHERE user_id = :id");
+        $this->db->bind(":id", $id);
+        $this->db->execute();
+        
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
+    }
+
+    if($userDelete) {
+      try {
+        $this->db->query("DELETE FROM comments WHERE user_id = :id");
+        $this->db->bind(":id", $id);
+        $this->db->execute();
+        
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
+    }
+
+    if($_SESSION["user_id"] == $id) {
+      unset($_SESSION["user_name"]);
+      unset($_SESSION["user_id"]);
+      unset($_SESSION["user_role"]);
+      session_destroy();
+      redirect();
+      exit();
+    }
+
+
+  }
+
+  public function deleteComment($id) {
+
+    if($_SESSION["user_role"] !== "admin") {
+      redirect();
+      exit();
+    }
+
+    try {
+      $this->db->query("DELETE FROM comments WHERE id = :id");
+      $this->db->bind(":id", $id);
+      return $this->db->execute();
+      
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+  }
+
+  public function c_statusCategory($id) {
+
+    if($_SESSION["user_role"] !== "admin") {
+      redirect();
+      exit();
+    }
+
+    try {
+      $this->db->query("SELECT * FROM categories WHERE id = :id");
+      $this->db->bind(':id', $id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount !== 0) {
+        $category_detail = $this->db->getResult();
+        $status = $category_detail["status"];
+      }
+    } catch (\Throwable $th) {
+      //throw $th;
+    }
+
+    if($status == "draft") {
+      try {
+        $this->db->query("UPDATE categories SET status = 'public' WHERE id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $rowCount = $this->db->rowCount();
+        if($rowCount !== 0) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (\Throwable $th) {
+        //throw $th;
+      }
+    } elseif($status == "public") {
+      try {
+        $this->db->query("UPDATE categories SET status = 'draft' WHERE id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $rowCount = $this->db->rowCount();
+        if($rowCount !== 0) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (\Throwable $th) {
+        //throw $th;
+      }
+    }
+
+    
+  }
+
+  public function getPostImage($id) {
+    try {
+      $this->db->query('SELECT image FROM posts WHERE id = :id');
+      $this->db->bind(':id', $id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount > 0) {
+        $post_detail = $this->db->getResult();
+        $image = $post_detail["image"];
+        return $image;
+      } else {
+        return false;
+      }
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+  
   }
 
 

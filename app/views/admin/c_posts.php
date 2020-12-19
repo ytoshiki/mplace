@@ -4,6 +4,7 @@ if(isset($data["error"])) {
 
     $title_error = $data["error"]["title"];
     $body_error = $data["error"]["body"];
+    $category_error = $data["error"]["category"];
 }
 ?>
 
@@ -24,6 +25,7 @@ if(isset($data["error"])) {
     }
     ?>
  </div>
+ <?php  echo isset($category_error) ? "<p class='alert'>" . $category_error ."</p>" : false ?>
   <textarea name="body" id="" cols="30" rows="10"></textarea><br>
   <?php  echo isset($body_error) ? "<p class='alert'>" . $body_error ."</p>" : false ?>
   <input type="file" name="file"><br>

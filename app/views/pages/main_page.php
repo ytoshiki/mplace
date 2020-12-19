@@ -3,8 +3,13 @@
 
 <header>
  <?php include('app/views/inc/navigation.php') ?>
+
+ <?php 
  
-  <div class="main_header wrapper">
+ if(!isset($_SESSION["user_id"])) {
+   ?>
+
+<div class="main_header wrapper">
     <div class="main_header_inner">
       <h1 class="main_header_inner_top">
         <div>Get Informed</div>
@@ -20,6 +25,10 @@
       </div>
     </div>
   </div>
+
+   <?php
+ }
+ ?>
 
 </header>
 
