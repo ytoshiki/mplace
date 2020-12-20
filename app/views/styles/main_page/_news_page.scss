@@ -4,7 +4,6 @@
       justify-content: space-between;
       border-bottom: 1px solid $dark_grey_color;
       padding-bottom: 21px;
-      margin-bottom: 80px;
 
       a {
         font-weight: bold;
@@ -27,6 +26,7 @@
         background: white;
         border-bottom: 1px solid $dark_grey_color;
         padding-bottom: 10px;
+        margin-top: 80px;
 
         &:nth-child(3n + 3) {
           margin-right: 0;
@@ -89,6 +89,13 @@
       padding: 10px 12px;
       color: $white_color;
       border-radius: 4px;
+
+      a,
+      a:hover,
+      a:visited,
+      a:focus {
+        color: $white_color;
+      }
     }
   }
 }

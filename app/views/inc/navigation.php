@@ -5,7 +5,7 @@
     <div class="logo_container">
       <div class="logo">
         <a href="<?php echo URLROOT; ?>">
-          <img src="<?php echo URLROOT; ?>/app/views/images/main_logo.png" alt="">
+          <img src="<?php echo URLROOT; ?>/app/views/images/logo.png" alt="">
         </a>
       </div>
     </div>
@@ -15,7 +15,10 @@
           <div class="svg">
             <img src="<?php echo URLROOT; ?>/app/views/images/search.png" alt="">
           </div>
-          <input type="text" name="searchNav" placeholder="Search Article" class="search_input">
+          <form action="<?php echo URLROOT ?>/page/search" method="GET">
+            <input type="text" name="search" placeholder="Search Article" class="search_input">
+            <input type="hidden" name="submit">
+          </form>
         </button>
       </li>
       <?php 

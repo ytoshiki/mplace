@@ -5,10 +5,15 @@
       $this->page_model = $this->model("PageModel");
     }
 
-    public function index() {
-      if($_SERVER["REQUEST_METHOD"] == "GET") {
+    public function index($page = null) {
+      if($_SERVER["REQUEST_METHOD"] == "GET" && $page == "all") {
         $data = array();
-        
+        $data["posts"] = $this->page_model->getAllPosts();
+        $data["categories"] = $this->page_model->getCategories();
+        $this->view('pages/main_page', $data);
+      } elseif($_SERVER["REQUEST_METHOD"] == "GET" && $page == null) {
+        $data = array();
+        $data["readmore"] = true;
         $data["posts"] = $this->page_model->getPosts();
         $data["categories"] = $this->page_model->getCategories();
         $this->view('pages/main_page', $data);
@@ -69,6 +74,39 @@
             redirect("page/post/" . $id);
           }
   
+      }
+    }
+
+    public function filter($category) {
+      $postResult = $this->page_model->filterByCategory($category);
+      if($postResult) {
+        $data = array();
+        $data["posts"] = $postResult;
+        $data["categories"] = $this->page_model->getCategories();
+        $this->view('pages/main_page', $data);
+      } else {
+        $data = array();
+       
+        $data["categories"] = $this->page_model->getCategories();
+        $this->view('pages/main_page', $data);
+      }
+
+    }
+
+    public function search() {
+      if($_SERVER["REQUEST_METHOD"] == 'GET' && isset($_GET["submit"])) {
+        $p_title = filter_var($_GET["search"], FILTER_SANITIZE_STRING);
+
+        $postResult = $this->page_model->filterByKeyword($p_title);
+
+        if($postResult) {
+          $data = array();
+          $data["posts"] = $postResult;
+          $this->view('pages/search_result', $data);
+        } else {
+          $this->view('pages/search_result');
+        }
+        
       }
     }
 

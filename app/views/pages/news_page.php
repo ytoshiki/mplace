@@ -6,13 +6,14 @@
 
     <ul class="news_nav flex_ai_c">
     <?php 
-      if(isset($data)) {
+      if(isset($data["categories"])) {
 
       foreach($data["categories"] as $value) {
       $name = $value->name;
+      $id = $value->id;
       ?>
 
-      <li><a href=""><?php echo $name; ?></a></li>
+      <li><a href="<?php echo URLROOT; ?>/page/filter/<?php echo $id ?>"><?php echo $name; ?></a></li>
 
       <?php 
       }}
@@ -23,7 +24,7 @@
     <ul class="articles flex">
     <?php 
       
-      if(isset($data)) {
+      if(isset($data["posts"])) {
 
         foreach($data["posts"] as $value) {
           $title = $value->title;
@@ -34,7 +35,7 @@
 
 
           <li class="article">
-          <div class="article_top" style="background: url('app/views/uploads/<?php echo $image ?>');">
+          <div class="article_top" style="background: url('<?php echo URLROOT; ?>/app/views/uploads/<?php echo $image ?>');">
             <div class="article_title">
             <a href="<?php echo URLROOT ?>/page/post/<?php echo $id ?>">
               <?php echo $title; ?>
@@ -65,11 +66,21 @@
     ?>
 
     </ul>
-    <div class="article_read_wrapper">
-    <button class="article_read">
-      Read more
-    </button>
-    </div>
+    <?php if(isset($data["readmore"])) {
+      ?>
 
+      <div class="article_read_wrapper">
+        <button class="article_read">
+          <a href="<?php echo URLROOT ?>/page/index/all">
+          Read more
+          </a>
+        </button>
+      </div>
+
+      <?php
+    } 
+    ?>
+    
+ 
   </div>
 </div>
