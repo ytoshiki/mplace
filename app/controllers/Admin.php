@@ -43,6 +43,9 @@
             $postData = $this->adminModel->getPost($id);
             $categoryData = $this->adminModel->getAllCategories();
           break;
+          case "uusers":
+            $display = "uusers";
+            $userData = $this->adminModel->getUser($id);
           default:
             
         }
@@ -130,7 +133,7 @@
             $unique = uniqid("", true);
             $filename = $unique . "." . $tem_actFileExt;
     
-            $fileDestination = "app/views/uploads/" . $filename;
+            $fileDestination = "app/views/uploads/posts/" . $filename;
     
             move_uploaded_file($tem_filetmp, $fileDestination);
       
@@ -232,10 +235,15 @@
            if(!isset($prev_image)) {
             $unique = uniqid("", true);
             $filename = $unique . "." . $tem_actFileExt;
-    
-            $fileDestination = "app/views/uploads/" . $filename;
+
+            $fileDestination = "app/views/uploads/posts/" . $filename;
     
             move_uploaded_file($tem_filetmp, $fileDestination);
+
+            $old_image = $this->adminModel->getPostImage(intval($id));
+
+            deleteImage("app/views/uploads/posts/", $old_image);
+
            } 
             // <- saved image 
             $data = array();
@@ -311,7 +319,12 @@
 
       switch($table) {
         case "post":
+          $post = $this->adminModel->getPost($id);
+          $image = $post["image"];
           $result = $this->adminModel->deletePost($id);
+          if($result) {
+            deleteImage("app/views/uploads/posts/", $image);
+          }
         break;
         case "comment":
           $result = $this->adminModel->deleteComment($id);
@@ -325,11 +338,8 @@
         default:
       }
 
-      if($result) {
-        redirect("admin/index");  
-      } else {
-        redirect("admin/index");
-      }
+      redirect("admin/index");  
+     
     }
 
     public function status($id, $table) {
@@ -351,6 +361,156 @@
         redirect("admin/index/categories");  
       } else {
         redirect("admin/index/categories");
+      }
+    }
+
+    public function update($id = null) {
+      if($_SERVER["REQUEST_METHOD"] == 'POST' || $_SESSION['user_role'] == "admin") {
+      
+
+        if(!isset($_POST["submit"])) {
+          redirect();
+          exit();
+      
+        } else {
+       
+          $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+          $tem_username = trim($_POST["username"]);
+          $tem_email = $_POST["email"];
+          $tem_role = $_POST["role"];
+        
+      
+          $error = array();
+          $error["username"] = "";
+          $error["email"] = "";
+          $error["image"] = "";
+          $error["role"] = "";
+      
+      
+           // image info
+           $tem_image = $_FILES["file"];
+           $tem_filename = $tem_image["name"];
+           $tem_filetype = $tem_image["type"];
+           $tem_filetmp = $tem_image["tmp_name"];
+           $tem_filesize = $tem_image["size"];
+           $tem_fileerror = $tem_image["error"];
+      
+           $user_data = $this->adminModel->getUser($id);
+      
+           if($user_data) {
+
+           if($tem_image["size"] == 0) {
+            $prev_image = $user_data["avator"];
+      
+      
+            } else {
+             // -> start iamge test
+      
+             $tem_fileExt = explode(".", $tem_filename);
+             $tem_actFileExt = strtolower(end($tem_fileExt));
+      
+             $arrowed_ext = ["jpg", "jpeg", "png", "pdf"];
+      
+             if(!in_array($tem_actFileExt, $arrowed_ext)) {
+               $error["image"] = "image format must be jpg, jpeg, png, or pdf.";
+             }
+      
+             if($tem_fileerror !== 0) {
+               $error["image"] = $tem_image;
+             }
+      
+             if($tem_filesize > 1000000) {
+               $error["image"] = "image size is too big. Try another one.";
+             }
+      
+             // <- end image test
+      
+          }
+      
+          if(empty($tem_username)) {
+            $error["username"] = "username cannot be empty.";
+          }
+      
+          if(empty($tem_email)) {
+            $error["email"] = "email cannot be empty.";
+          }
+
+          
+          if(empty($tem_role)) {
+            $error["role"] = "role cannot be empty.";
+          }
+
+          if(($tem_role !== "admin") && ($tem_role !== "subscriber")) {
+            $error["role"] = "role must be either admin or subscirber.";
+          }
+      
+          
+          if(!$error["username"] && !$error["email"] && !$error["image"] && !$error["role"]) {
+      
+            
+      
+            if(!isset($prev_image)) { 
+              $unique = uniqid("", true);
+              $filename = $unique . "." . $tem_actFileExt;
+      
+              $fileDestination = "app/views/uploads/avators/" . $filename;
+      
+              move_uploaded_file($tem_filetmp, $fileDestination);
+      
+              $old_image = $user_data["avator"];
+      
+                if($old_image !== "avator.png") {
+        
+                  deleteImage("app/views/uploads/avators/", $old_image);
+                }
+      
+              
+            }
+              // <- saved image 
+      
+              $data = array();
+              $data["username"] = trim($_POST["username"]);
+              $data["email"] = $_POST["email"];
+              $data["avator"] = isset($prev_image) ? $prev_image : $filename;
+              $data["role"] = $_POST["role"];
+             
+              $update_result = $this->adminModel->updateUser($data, $id);
+              
+              if(!$update_result["error"]["username"] && !$update_result["error"]["email"] && $update_result) {
+                
+                redirect("admin/index/users");
+              } elseif($update_result["error"]["username"] || $update_result["error"]["email"]) {
+              
+                $data_container = array();
+                $data_container["users"] = $_POST;
+                $data_container["users"]["id"] = $id;
+                $data_container["users"]["avator"] = $user_data["avator"];
+                $data_container["error"]["username"] = $update_result["error"]["username"] ? $update_result["error"]["username"] : "";
+                $data_container["error"]["email"] = $update_result["error"]["email"] ? $update_result["error"]["email"] : "";
+                $data_container["display"] = "uusers";
+                $this->view("admin/main_admin", $data_container);
+              }
+             } else {
+      
+            
+              $data_container = array();
+              $data_container["users"] = $_POST;
+              $data_container["users"]["id"] = $id;
+              $data_container["users"]["avator"] = $user_data["avator"];
+              $data_container["error"] = $error;
+              $data_container["display"] = "uusers";
+              $this->view("admin/main_admin", $data_container);
+          
+             }
+      
+          } else {
+            redirect();
+            exit();
+            
+          }
+          
+        }
+      
       }
     }
   }

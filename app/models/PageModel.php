@@ -49,6 +49,23 @@
       return $this->db->getResult();
    }
 
+   public function getSimilarPosts($id, $category_id) { 
+      $this->db->query("SELECT * FROM posts 
+      WHERE category_id = :category_id 
+      AND id != :id
+      AND status = 'public'
+      LIMIT 5");
+      $this->db->bind(":category_id", $category_id);
+      $this->db->bind(":id", $id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount > 0) {
+         return $this->db->getResults();
+      } else {
+         return false;
+      }
+   }
+
    public function createComment($data) {
       $this->db->query("INSERT INTO comments (user_id, comment, post_id, category_id) VALUES (:user_id, :comment, :post_id, :category_id)");
       $this->db->bind(":comment", $data["comment"]);
@@ -96,6 +113,64 @@
       $rowCount = $this->db->rowCount();
       if($rowCount > 0) {
          return $this->db->getResults();
+      } else {
+         return false;
+      }
+   }
+
+   public function addBookmark($user_id, $post_id) {
+      $this->db->query("INSERT INTO bookmarks (user_id, post_id) 
+      VALUES (:user_id, :post_id)");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->bind(':post_id', $post_id);
+      return $this->db->execute();
+   }
+
+   public function getBookmarks($user_id) {
+      $this->db->query("SELECT * FROM bookmarks
+      WHERE user_id = :user_id");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount) {
+        return $this->db->getResults();
+      } else {
+         return false;
+      }
+   }
+
+   public function getBookmarksAll($user_id) {
+      $this->db->query("SELECT b.id, b.user_id, b.post_id, p.title, p.image, p.category_id, p.user_id, u.username, c.name
+      FROM bookmarks AS b
+      LEFT JOIN posts AS p ON b.post_id = p.id
+      LEFT JOIN categories AS c ON p.category_id = c.id
+      LEFT JOIN users AS u ON p.user_id = u.id
+      WHERE b.user_id = :user_id");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount) {
+        return $this->db->getResults();
+      } else {
+         return false;
+      }
+   }
+
+   public function removeBookmark($user_id, $post_id) {
+      $this->db->query("DELETE FROM bookmarks WHERE user_id = :user_id AND post_id = :post_id");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->bind(':post_id', $post_id);
+      return $this->db->execute();
+   }
+
+   public function checkBookmarked($user_id, $post_id) {
+      $this->db->query("SELECT * FROM bookmarks WHERE user_id = :user_id AND post_id = :post_id");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->bind(':post_id', $post_id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount) {
+         return true;
       } else {
          return false;
       }

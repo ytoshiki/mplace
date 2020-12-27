@@ -72,24 +72,39 @@ class AdminModel {
       redirect();
       exit();
     }
-    try {
-      $this->db->query("DELETE FROM posts WHERE id = :id");
-      $this->db->bind(":id", $id);
-      $result = $this->db->execute();
-      
-    } catch (PDOException $ex) {
-      echo $ex->getMessage();
-    }
 
-    if($result) {
       try {
-        $this->db->query("DELETE FROM comments WHERE post_id = :id");
+        $this->db->query("DELETE FROM posts WHERE id = :id");
         $this->db->bind(":id", $id);
-        return $this->db->execute();
+        $result_d = $this->db->execute();
+        
       } catch (PDOException $ex) {
         echo $ex->getMessage();
       }
-    }
+  
+      if($result_d) {
+
+        try {
+          $this->db->query("DELETE FROM comments WHERE post_id = :id");
+          $this->db->bind(":id", $id);
+          $this->db->execute();
+        } catch (PDOException $ex) {
+          echo $ex->getMessage();
+        }
+
+        try {
+          $this->db->query("DELETE FROM bookmarks WHERE post_id = :id");
+          $this->db->bind(":id", $id);
+          $this->db->execute();
+        } catch (PDOException $ex) {
+          echo $ex->getMessage();
+        }
+
+        return true;
+      }
+
+
+
   }
 
   public function getAllComments() {
@@ -183,6 +198,22 @@ class AdminModel {
     }
   }
 
+  public function getUser($user_id) {
+    try {
+      $this->db->query("SELECT * FROM users WHERE id = :user_id");
+      $this->db->bind(':user_id', $user_id);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+      if($rowCount !== 0) {
+        return $this->db->getResult();
+      } else {
+        return false;
+      }
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+  }
+
   public function deleteUser($id) {
 
     if($_SESSION["user_role"] !== "admin") {
@@ -231,6 +262,75 @@ class AdminModel {
     }
 
 
+  }
+
+  public function updateUser($data, $id) {
+
+    try {
+      $this->db->query("SELECT * FROM users WHERE username = :username");
+  
+      $this->db->bind(':username', $data["username"]);
+      $this->db->execute();
+      $rowCount = $this->db->rowCount();
+
+      if($rowCount > 0) {
+        $user = $this->db->getResult();
+        if($user["id"] == $id) {
+           $result = true;
+        } else {
+          $return_data["error"]["username"] = "Username is already taken.";
+          return $return_data;
+        }
+      } else {
+        $result = true;
+      }
+
+    } catch (PDOException $ex) {
+      echo $ex->getMessage();
+    }
+
+    if($result) {
+      try {
+        $this->db->query("SELECT * FROM users WHERE email = :email");
+    
+        $this->db->bind(':email', $data["email"]);
+        $this->db->execute();
+        $rowCount = $this->db->rowCount();
+  
+        if($rowCount > 0) {
+          $user = $this->db->getResult();
+          if($user["id"] == $id) {
+             $result = true;
+          } else {
+            $return_data["error"]["email"] = "Email is already taken.";
+            return $return_data;
+          }
+        } else {
+          $result = true;
+        }
+  
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
+    }
+    
+    if($result) {
+      try {
+        $this->db->query("UPDATE users 
+        SET username = :username, email = :email, avator = :avator, role = :role
+        WHERE id = :id");
+        $this->db->bind(":username", $data["username"]);
+        $this->db->bind(":email", $data["email"]);
+        $this->db->bind(":role", $data["role"]);
+        $this->db->bind(":avator", $data["avator"]);
+        $this->db->bind(":id", $id);
+        return $this->db->execute();
+      } catch (PDOException $ex) {
+        echo $ex->getMessage();
+      }
+
+    }
+   
   }
 
   public function deleteComment($id) {

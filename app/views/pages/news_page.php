@@ -1,3 +1,12 @@
+<?php 
+  if(isset($data["bookmarks"])) {
+    $bookmarksArr = array();
+    foreach($data["bookmarks"] as $key) {
+      array_push($bookmarksArr, $key->post_id);
+    }
+  }
+
+?>
 
 
 
@@ -20,10 +29,10 @@
       ?>
     </ul>
 
-
+    
     <ul class="articles flex">
     <?php 
-      
+ 
       if(isset($data["posts"])) {
 
         foreach($data["posts"] as $value) {
@@ -35,7 +44,7 @@
 
 
           <li class="article">
-          <div class="article_top" style="background: url('<?php echo URLROOT; ?>/app/views/uploads/<?php echo $image ?>');">
+          <div class="article_top" style="background: url('<?php echo URLROOT; ?>/app/views/uploads/posts/<?php echo $image ?>');">
             <div class="article_title">
             <a href="<?php echo URLROOT ?>/page/post/<?php echo $id ?>">
               <?php echo $title; ?>
@@ -47,15 +56,25 @@
               <p><?php echo "Written By " . $author; ?></p>
             </div>
             <div class="article_func">
-              <div class="article_fav">
-              <i class="far fa-heart"></i>
+              <?php   
+                if(isset($data["bookmarks"]) && in_array($id, $bookmarksArr)) {
+                  $imageSrc = "bookmark-red.png";
+                  $action = "remove";
+                } else {
+                  $imageSrc = "bookmark.png";
+                  $action = "";
+                } 
+              ?>
+              <a href="<?php echo URLROOT ?>/book/<?php echo $id ?>/<?php echo $action ?>" class="bookmark">
+              <div class="article_fav <?php echo (($_SESSION["user_role"] == 'subscriber') || ($_SESSION["user_role"] == 'admin')) ? 'authorized': ''?>">
+            
+                <img src="<?php echo URLROOT ?>/app/views/images/<?php echo $imageSrc; ?>" alt="">
               </div>
+              </a>
               <div class="article_share">
-              <i class="fas fa-share"></i>
+              <img src="<?php echo URLROOT ?>/app/views/images/link.png" alt="" data-url="<?php echo URLROOT ?>/page/post/<?php echo $id ?>" class="share_link">
               </div>
-              <div class="article_comments">
-              <i class="far fa-comment-dots"></i>
-              </div>
+             
             </div>
           </div>
         </li>
@@ -65,8 +84,10 @@
       } 
     ?>
 
+   
+
     </ul>
-    <?php if(isset($data["readmore"])) {
+    <?php if(isset($data["readmore"]) && sizeof($data["posts"]) == 3) {
       ?>
 
       <div class="article_read_wrapper">

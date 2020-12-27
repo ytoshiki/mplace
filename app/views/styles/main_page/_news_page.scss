@@ -64,8 +64,18 @@
             justify-content: flex-end;
             padding-right: 5px;
 
-            .article_share,
-            .article_comments {
+            .article_fav,
+            .article_share {
+              width: 25px;
+              height: 25px;
+
+              img {
+                width: 100%;
+                height: 100%;
+              }
+            }
+
+            .article_share {
               margin-left: 20px;
             }
 

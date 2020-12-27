@@ -9,3 +9,28 @@
   <title>Flipboard</title>
 </head>
 <body>
+
+<div class="bookmark_modal">
+  <div class="modal_wrapper">
+    <div class="bookmark_shadow"></div>
+    <div class="modal_content">
+      <h3>WANT MORE STORIES?</h3>
+      <p>Sign up for more favourite stories</p>
+      <a href="<?php echo URLROOT ?>/user/signup" id="signup_button">
+          Sign up
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="url_modal">
+  <div class="modal_wrapper">
+    <div class="url_shadow"></div>
+    <div class="modal_content">
+      <h3>COPY THE URL ADDRESS</h3>
+      <p>SHARE THE LINK WITH YOUR FRIENDS</p>
+      <span class="url_insert"></span><span class="copy_button">COPY</span>
+    </div>
+  </div>
+</div>
+

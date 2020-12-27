@@ -3,6 +3,8 @@
   class Page extends Controller {
     public function __construct() {
       $this->page_model = $this->model("PageModel");
+      $this->authorized = (isset($_SESSION["user_id"]) && isset($_SESSION["user_role"]));
+      $this->authenticated = $this->authorized ? (($_SESSION["user_role"] == "admin") || ($_SESSION["user_role"] == "subscriber")) : false;
     }
 
     public function index($page = null) {
@@ -10,12 +12,18 @@
         $data = array();
         $data["posts"] = $this->page_model->getAllPosts();
         $data["categories"] = $this->page_model->getCategories();
+        if($this->authenticated) {
+          $data["bookmarks"] = $this->page_model->getBookmarks($_SESSION["user_id"]);
+        }
         $this->view('pages/main_page', $data);
       } elseif($_SERVER["REQUEST_METHOD"] == "GET" && $page == null) {
         $data = array();
         $data["readmore"] = true;
         $data["posts"] = $this->page_model->getPosts();
         $data["categories"] = $this->page_model->getCategories();
+        if($this->authenticated) {
+          $data["bookmarks"] = $this->page_model->getBookmarks($_SESSION["user_id"]);
+        }
         $this->view('pages/main_page', $data);
       }
     }
@@ -24,9 +32,21 @@
       if($_SERVER["REQUEST_METHOD"] == "GET") {
         $post = $this->page_model->getPost($id);
         $comments = $this->page_model->getComments($id);
+        $widgetsPosts = $this->page_model->getSimilarPosts($id, $post["category_id"]);
         $data = array();
         $data["post"] = $post;
         $data["comments"] = $comments;
+        if($widgetsPosts) {
+          $data["widgets"] = $widgetsPosts;
+        }
+
+        if($this->authenticated) {
+          $user_id = $_SESSION["user_id"];
+          $post_id = $id;
+          $bookmarked = $this->page_model->checkBookmarked($user_id, $post_id);
+          $data["bookmarked"] = $bookmarked;
+        }
+
         $this->view('pages/singlePost_page', $data);
       }
     }
@@ -71,7 +91,16 @@
             }
   
           } else {
-            redirect("page/post/" . $id);
+       
+            $data = array();
+            $post = $this->page_model->getPost($id);
+            $u_id = $_SESSION["user_id"];
+            $data["post"] = $post;
+            $data["widgets"] = $this->page_model->getSimilarPosts($id, $post["category_id"]);
+            $data["bookmarked"] = $this->page_model->checkBookmarked($u_id, $id);
+            $data["comments"] = $this->page_model->getComments($id);
+            $data["error"] = $error;
+            $this->view("pages/singlePost_page", $data);
           }
   
       }
@@ -83,6 +112,9 @@
         $data = array();
         $data["posts"] = $postResult;
         $data["categories"] = $this->page_model->getCategories();
+        if($this->authenticated) {
+          $data["bookmarks"] = $this->page_model->getBookmarks($_SESSION["user_id"]);
+        }
         $this->view('pages/main_page', $data);
       } else {
         $data = array();
@@ -101,6 +133,7 @@
 
         if($postResult) {
           $data = array();
+          $data["title"] = "Search Result";
           $data["posts"] = $postResult;
           $this->view('pages/search_result', $data);
         } else {
@@ -109,6 +142,60 @@
         
       }
     }
+
+    public function bookmark() {
+      if(!$this->authenticated) {
+        redirect();
+        exit();
+      }
+
+      $posts = $this->page_model->getBookmarksAll($_SESSION["user_id"]);
+
+      if($posts) {
+        $data = array();
+        $data["title"] = "Bookmarks";
+        $data["posts"] = $posts;
+        $this->view('pages/search_result', $data);
+      } else {
+        $this->view('pages/search_result');
+      }
+
+    }
+
+    public function book($post_id, $action = null) {
+      if(!$this->authenticated) {
+        redirect();
+        exit();
+      } 
+
+      if($action == null) {
+
+        $result = $this->page_model->addBookmark($_SESSION["user_id"], $post_id);
+ 
+
+        if($result) {
+          
+          // Redirect to the prev url
+          header('Location: ' . $_SERVER['HTTP_REFERER']);
+          exit;
+        }
+      } elseif($action == "remove") {
+        $result = $this->page_model->removeBookmark($_SESSION["user_id"], $post_id);
+
+        
+        if($result) {
+        
+          // Redirect to the prev url
+
+          header('Location: ' . $_SERVER['HTTP_REFERER']);
+          exit;
+        } 
+      } 
+
+    }
+
+
+    
 
    
   }

@@ -62,6 +62,9 @@
           case "users":
             include("app/views/admin/users.php");
           break;
+          case "uusers":
+            include("app/views/admin/u_users.php");
+          break;
           default:
            include("app/views/admin/default_page.php");
         }

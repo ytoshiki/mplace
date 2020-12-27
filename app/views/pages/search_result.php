@@ -7,6 +7,12 @@
 
   <div class="post_search_page wrapper">
 
+  <?php
+    if(isset($data["title"])) {
+      echo "<h1 class='center'>" . $data["title"] . "</h1>";
+    }
+  ?>
+
   <ul>
       <?php 
         if(isset($data["posts"])) {
@@ -17,7 +23,7 @@
             $author = $value->username;
             $category = $value->name;
             $image = $value->image;
-            $id = $value->id;
+            $id = isset($value->post_id) ? $value->post_id : $value->id;
       ?>
 
         <li class="post_list">
@@ -25,7 +31,7 @@
           <div class="post_search flex">
             <div class="post_search_left">
               <div class="img_wrapper">
-                <img src="<?php echo URLROOT; ?>/app/views/uploads/<?php echo $image ?>" alt="">
+                <img src="<?php echo URLROOT; ?>/app/views/uploads/posts/<?php echo $image ?>" alt="">
               </div>
             </div>
             <div class="post_search_right">
